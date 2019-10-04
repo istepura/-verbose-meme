@@ -3,12 +3,6 @@ language: node_js
 services:
   - docker
 
-before_install:
-  - docker build -t istepura/react-test -f ./client/Dockerfile.dev ./client
-
-scripts:
-  - docker run -e CI=true istepura/react-test yarn test
-
 after_success:
   - docker build -t istepura/fibonator_client ./client
   - docker build -t istepura/fibonator_gateway ./nginx
