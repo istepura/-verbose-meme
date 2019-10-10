@@ -15,5 +15,27 @@ spec:
       containers:
         - name: server
           image: istepura/fibonator_api
+          resources:
+            limits:
+              cpu: 100m
+              memory: 512M
           ports:
             - containerPort: 5000
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              value: "6379"
+            - name: PG_HOST
+              value: postgres-cluster-ip-service
+            - name: PG_PORT
+              value: "5432"
+            - name: PG_USER
+              value: postgres
+            - name: PG_DB
+              value: postgres
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: password
