@@ -10,6 +10,7 @@ env:
   global:
     # Do not prompt for user input when using any SDK methods.
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    - GIT_SHA=$(git rev-parse HEAD)
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_0c35eebf403c_key -iv $encrypted_0c35eebf403c_iv -in service-account.json.enc -out service-account.json -d
@@ -20,6 +21,17 @@ before_install:
   - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud components update kubectl
   - gcloud auth activate-service-account --key-file service-account.json
-
-install: true
-script: true
+  - gcloud config set project docker-k8s-255619
+  - gcloud config set compute/zone us-east1-b
+  - gcloud container clusters get-credentials standard-cluster-1
+  - echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t istepura/fibonator_client_test -f ./client/Dockerfile.dev ./client
+  - echo "$GIT_SHA"
+  - echo "$TRAVIS_COMMIT"
+script:
+  - docker run -e CI=true istepura/fibonator_client_test yarn test
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: master
